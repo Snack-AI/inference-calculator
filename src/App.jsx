@@ -129,22 +129,30 @@ const SnackLandingPage = () => {
   const availableProviders = Object.keys(providerData[selectedModel] || {});
 
   // Formspree endpoint - all forms go to hello@snackai.dev
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mpqzdobg';
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mjgvwlal';
+
+  const submitToFormspree = async (data) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    
+    await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+  };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: '[Snack] New contact message',
-          email: contactForm.email,
-          message: contactForm.message,
-        }),
+      await submitToFormspree({
+        email: contactForm.email,
+        message: contactForm.message,
+        _subject: '[Snack] New contact message',
       });
       setContactSubmitted(true);
     } catch (err) {
@@ -156,16 +164,9 @@ const SnackLandingPage = () => {
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: '[Snack] New waitlist signup',
-          email: waitlistEmail,
-        }),
+      await submitToFormspree({
+        email: waitlistEmail,
+        _subject: '[Snack] New waitlist signup',
       });
       setWaitlistSubmitted(true);
     } catch (err) {
@@ -177,18 +178,11 @@ const SnackLandingPage = () => {
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: '[Snack] New lead - wants traffic analysis',
-          name: uploadForm.name,
-          email: uploadForm.email,
-          useCase: uploadForm.useCase,
-        }),
+      await submitToFormspree({
+        name: uploadForm.name,
+        email: uploadForm.email,
+        useCase: uploadForm.useCase,
+        _subject: '[Snack] New lead - wants traffic analysis',
       });
       setUploadSubmitted(true);
     } catch (err) {
