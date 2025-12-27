@@ -19,6 +19,9 @@ const SnackLandingPage = () => {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
   const [uploadSubmitted, setUploadSubmitted] = useState(false);
+  const [contactError, setContactError] = useState(false);
+  const [waitlistError, setWaitlistError] = useState(false);
+  const [uploadError, setUploadError] = useState(false);
 
   // Real pricing data - Dec 2024
   // Latency = TTFT (time to first token) in ms, based on Artificial Analysis & FriendliAI benchmarks
@@ -132,22 +135,33 @@ const SnackLandingPage = () => {
   const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mjgvwlal';
 
   const submitToFormspree = async (data) => {
-    const formData = new FormData();
+    const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
+      params.append(key, value);
     });
     
-    await fetch(FORMSPREE_ENDPOINT, {
+    const response = await fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
-      body: formData,
+      body: params,
       headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json'
       }
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Formspree error:', errorData);
+      throw new Error('Form submission failed');
+    }
+    
+    return response.json();
   };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
+    setContactError(false);
+    console.log('Submitting contact form:', contactForm);
     try {
       await submitToFormspree({
         email: contactForm.email,
@@ -157,12 +171,14 @@ const SnackLandingPage = () => {
       setContactSubmitted(true);
     } catch (err) {
       console.error('Form error:', err);
-      setContactSubmitted(true);
+      setContactError(true);
     }
   };
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
+    setWaitlistError(false);
+    console.log('Submitting waitlist:', waitlistEmail);
     try {
       await submitToFormspree({
         email: waitlistEmail,
@@ -171,12 +187,14 @@ const SnackLandingPage = () => {
       setWaitlistSubmitted(true);
     } catch (err) {
       console.error('Form error:', err);
-      setWaitlistSubmitted(true);
+      setWaitlistError(true);
     }
   };
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
+    setUploadError(false);
+    console.log('Submitting upload form:', uploadForm);
     try {
       await submitToFormspree({
         name: uploadForm.name,
@@ -187,7 +205,7 @@ const SnackLandingPage = () => {
       setUploadSubmitted(true);
     } catch (err) {
       console.error('Form error:', err);
-      setUploadSubmitted(true);
+      setUploadError(true);
     }
   };
 
@@ -542,6 +560,11 @@ const SnackLandingPage = () => {
                   >
                     Send message
                   </button>
+                  {contactError && (
+                    <p className="text-red-500 text-sm mt-2 text-center">
+                      Something went wrong. Please check your email and try again.
+                    </p>
+                  )}
                 </form>
                 <button 
                   onClick={() => setShowContactModal(false)}
@@ -567,6 +590,7 @@ const SnackLandingPage = () => {
                   onClick={() => {
                     setShowContactModal(false);
                     setContactSubmitted(false);
+                    setContactError(false);
                     setContactForm({ email: '', message: '' });
                   }}
                   className="text-stone-600 hover:text-stone-800"
@@ -654,6 +678,11 @@ const SnackLandingPage = () => {
                   >
                     Get started →
                   </button>
+                  {uploadError && (
+                    <p className="text-red-500 text-sm mt-2 text-center">
+                      Something went wrong. Please check your email and try again.
+                    </p>
+                  )}
                 </form>
                 
                 <button 
@@ -683,6 +712,7 @@ const SnackLandingPage = () => {
                   onClick={() => {
                     setShowUploadModal(false);
                     setUploadSubmitted(false);
+                    setUploadError(false);
                     setUploadForm({ name: '', email: '', useCase: '' });
                   }}
                   className="text-stone-600 hover:text-stone-800"
@@ -739,6 +769,11 @@ const SnackLandingPage = () => {
                   >
                     Join waitlist
                   </button>
+                  {waitlistError && (
+                    <p className="text-red-500 text-sm mt-2 text-center">
+                      Something went wrong. Please check your email and try again.
+                    </p>
+                  )}
                 </form>
                 <button 
                   onClick={() => setShowWaitlistModal(false)}
@@ -764,6 +799,7 @@ const SnackLandingPage = () => {
                   onClick={() => {
                     setShowWaitlistModal(false);
                     setWaitlistSubmitted(false);
+                    setWaitlistError(false);
                     setWaitlistEmail('');
                   }}
                   className="text-stone-600 hover:text-stone-800"
