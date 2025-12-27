@@ -136,17 +136,21 @@ const SnackLandingPage = () => {
     try {
       await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           _subject: '[Snack] New contact message',
           email: contactForm.email,
           message: contactForm.message,
         }),
       });
+      setContactSubmitted(true);
     } catch (err) {
-      console.log('Form submitted:', contactForm);
+      console.error('Form error:', err);
+      setContactSubmitted(true);
     }
-    setContactSubmitted(true);
   };
 
   const handleWaitlistSubmit = async (e) => {
@@ -154,16 +158,20 @@ const SnackLandingPage = () => {
     try {
       await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           _subject: '[Snack] New waitlist signup',
           email: waitlistEmail,
         }),
       });
+      setWaitlistSubmitted(true);
     } catch (err) {
-      console.log('Waitlist:', waitlistEmail);
+      console.error('Form error:', err);
+      setWaitlistSubmitted(true);
     }
-    setWaitlistSubmitted(true);
   };
 
   const handleUploadSubmit = async (e) => {
@@ -171,7 +179,10 @@ const SnackLandingPage = () => {
     try {
       await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           _subject: '[Snack] New lead - wants traffic analysis',
           name: uploadForm.name,
@@ -179,10 +190,11 @@ const SnackLandingPage = () => {
           useCase: uploadForm.useCase,
         }),
       });
+      setUploadSubmitted(true);
     } catch (err) {
-      console.log('Lead form:', uploadForm);
+      console.error('Form error:', err);
+      setUploadSubmitted(true);
     }
-    setUploadSubmitted(true);
   };
 
   // Cookie logo SVG component
