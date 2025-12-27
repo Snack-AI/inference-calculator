@@ -10,10 +10,13 @@ const SnackLandingPage = () => {
   const [showCalculation, setShowCalculation] = useState(false);
   
   // Modal states
+  const [showContactModal, setShowContactModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [email, setEmail] = useState('');
-  const [formData, setFormData] = useState({ name: '', email: '', useCase: '' });
+  const [contactForm, setContactForm] = useState({ email: '', message: '' });
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [uploadForm, setUploadForm] = useState({ name: '', email: '', useCase: '' });
+  const [contactSubmitted, setContactSubmitted] = useState(false);
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
   const [uploadSubmitted, setUploadSubmitted] = useState(false);
 
@@ -125,15 +128,60 @@ const SnackLandingPage = () => {
 
   const availableProviders = Object.keys(providerData[selectedModel] || {});
 
-  const handleWaitlistSubmit = (e) => {
+  // Formspree endpoint - all forms go to hello@snackai.dev
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mpqzdobg';
+
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    console.log('Waitlist email:', email);
+    try {
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _subject: '[Snack] New contact message',
+          email: contactForm.email,
+          message: contactForm.message,
+        }),
+      });
+    } catch (err) {
+      console.log('Form submitted:', contactForm);
+    }
+    setContactSubmitted(true);
+  };
+
+  const handleWaitlistSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _subject: '[Snack] New waitlist signup',
+          email: waitlistEmail,
+        }),
+      });
+    } catch (err) {
+      console.log('Waitlist:', waitlistEmail);
+    }
     setWaitlistSubmitted(true);
   };
 
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    console.log('Lead form:', formData);
+    try {
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _subject: '[Snack] New lead - wants traffic analysis',
+          name: uploadForm.name,
+          email: uploadForm.email,
+          useCase: uploadForm.useCase,
+        }),
+      });
+    } catch (err) {
+      console.log('Lead form:', uploadForm);
+    }
     setUploadSubmitted(true);
   };
 
@@ -163,11 +211,11 @@ const SnackLandingPage = () => {
           </span>
         </div>
         <button 
-          onClick={() => setShowWaitlistModal(true)}
+          onClick={() => setShowContactModal(true)}
           className="text-stone-600 hover:text-stone-900 transition text-sm"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          Get early access →
+          Contact us →
         </button>
       </nav>
 
@@ -437,15 +485,15 @@ const SnackLandingPage = () => {
         </div>
       </div>
 
-      {/* Waitlist Modal */}
-      {showWaitlistModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowWaitlistModal(false)}>
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowContactModal(false)}>
           <div 
             className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl"
             onClick={e => e.stopPropagation()}
             style={{ backgroundColor: '#FAF7F2' }}
           >
-            {!waitlistSubmitted ? (
+            {!contactSubmitted ? (
               <>
                 <div className="flex items-center gap-2 mb-6">
                   <CookieLogo className="w-6 h-6 text-stone-800" />
@@ -460,31 +508,37 @@ const SnackLandingPage = () => {
                   className="text-2xl font-bold text-stone-800 mb-2"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
-                  Get early access
+                  Send us a message
                 </h3>
                 <p className="text-stone-500 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                  We'll let you know when Snack is ready for you.
+                  Questions, feedback, or just want to chat? We'd love to hear from you.
                 </p>
-                <form onSubmit={handleWaitlistSubmit}>
+                <form onSubmit={handleContactSubmit} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
                   <input
                     type="email"
                     required
                     placeholder="you@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
                     className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 mb-4"
-                    style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                  />
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="What's on your mind?"
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                    className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 mb-4 resize-none"
                   />
                   <button
                     type="submit"
                     className="w-full bg-stone-900 text-white font-medium py-3 rounded-lg hover:bg-stone-800 transition"
-                    style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                   >
-                    Join waitlist
+                    Send message
                   </button>
                 </form>
                 <button 
-                  onClick={() => setShowWaitlistModal(false)}
+                  onClick={() => setShowContactModal(false)}
                   className="w-full mt-3 text-stone-500 text-sm hover:text-stone-700"
                   style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
@@ -493,21 +547,21 @@ const SnackLandingPage = () => {
               </>
             ) : (
               <div className="text-center py-4">
-                <div className="text-4xl mb-4">🍪</div>
+                <div className="text-4xl mb-4">✉️</div>
                 <h3 
                   className="text-2xl font-bold text-stone-800 mb-2"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
-                  You're on the list!
+                  Message sent!
                 </h3>
                 <p className="text-stone-500 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                  We'll reach out when it's your turn.
+                  We'll get back to you soon.
                 </p>
                 <button 
                   onClick={() => {
-                    setShowWaitlistModal(false);
-                    setWaitlistSubmitted(false);
-                    setEmail('');
+                    setShowContactModal(false);
+                    setContactSubmitted(false);
+                    setContactForm({ email: '', message: '' });
                   }}
                   className="text-stone-600 hover:text-stone-800"
                   style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
@@ -557,8 +611,8 @@ const SnackLandingPage = () => {
                         type="text"
                         required
                         placeholder="Jane Smith"
-                        value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        value={uploadForm.name}
+                        onChange={(e) => setUploadForm({...uploadForm, name: e.target.value})}
                         className="w-full bg-white border border-stone-200 rounded-lg px-4 py-2.5 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400"
                       />
                     </div>
@@ -569,8 +623,8 @@ const SnackLandingPage = () => {
                         type="email"
                         required
                         placeholder="you@company.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        value={uploadForm.email}
+                        onChange={(e) => setUploadForm({...uploadForm, email: e.target.value})}
                         className="w-full bg-white border border-stone-200 rounded-lg px-4 py-2.5 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400"
                       />
                     </div>
@@ -580,8 +634,8 @@ const SnackLandingPage = () => {
                       <textarea
                         rows={3}
                         required
-                        value={formData.useCase}
-                        onChange={(e) => setFormData({...formData, useCase: e.target.value})}
+                        value={uploadForm.useCase}
+                        onChange={(e) => setUploadForm({...uploadForm, useCase: e.target.value})}
                         placeholder="What are you building? What models are you using? What's your biggest inference pain point?"
                         className="w-full bg-white border border-stone-200 rounded-lg px-4 py-2.5 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 resize-none"
                       />
@@ -614,16 +668,97 @@ const SnackLandingPage = () => {
                   We're on it!
                 </h3>
                 <p className="text-stone-500 mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                  We'll reach out to {formData.email} within 2 business days.
+                  We'll reach out to {uploadForm.email} within 2 business days.
                 </p>
                 <p className="text-stone-400 text-sm mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                  Thanks for your interest, {formData.name.split(' ')[0]}!
+                  Thanks for your interest, {uploadForm.name.split(' ')[0]}!
                 </p>
                 <button 
                   onClick={() => {
                     setShowUploadModal(false);
                     setUploadSubmitted(false);
-                    setFormData({ name: '', email: '', useCase: '' });
+                    setUploadForm({ name: '', email: '', useCase: '' });
+                  }}
+                  className="text-stone-600 hover:text-stone-800"
+                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Waitlist Modal */}
+      {showWaitlistModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowWaitlistModal(false)}>
+          <div 
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl"
+            onClick={e => e.stopPropagation()}
+            style={{ backgroundColor: '#FAF7F2' }}
+          >
+            {!waitlistSubmitted ? (
+              <>
+                <div className="flex items-center gap-2 mb-6">
+                  <CookieLogo className="w-6 h-6 text-stone-800" />
+                  <span 
+                    className="text-xl font-bold text-stone-800"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    snack
+                  </span>
+                </div>
+                <h3 
+                  className="text-2xl font-bold text-stone-800 mb-2"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
+                  Join the waitlist
+                </h3>
+                <p className="text-stone-500 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                  We'll let you know when Snack is ready for you.
+                </p>
+                <form onSubmit={handleWaitlistSubmit} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@company.com"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 mb-4"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-stone-900 text-white font-medium py-3 rounded-lg hover:bg-stone-800 transition"
+                  >
+                    Join waitlist
+                  </button>
+                </form>
+                <button 
+                  onClick={() => setShowWaitlistModal(false)}
+                  className="w-full mt-3 text-stone-500 text-sm hover:text-stone-700"
+                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                >
+                  Maybe later
+                </button>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="text-4xl mb-4">🍪</div>
+                <h3 
+                  className="text-2xl font-bold text-stone-800 mb-2"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
+                  You're on the list!
+                </h3>
+                <p className="text-stone-500 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                  We'll reach out when it's your turn.
+                </p>
+                <button 
+                  onClick={() => {
+                    setShowWaitlistModal(false);
+                    setWaitlistSubmitted(false);
+                    setWaitlistEmail('');
                   }}
                   className="text-stone-600 hover:text-stone-800"
                   style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
