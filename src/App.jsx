@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 const SnackLandingPage = () => {
   const [currentProvider, setCurrentProvider] = useState('');
@@ -812,6 +813,7 @@ const SnackLandingPage = () => {
           </div>
         </div>
       )}
+      <Analytics />
     </div>
   );
 };
