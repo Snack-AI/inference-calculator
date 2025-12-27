@@ -1,67 +1,50 @@
-# Snack Inference Calculator
+# Snack - Inference Cost Calculator
 
-A cost comparison calculator for LLM inference providers.
+**Stop overpaying for LLM inference.** Compare costs across providers in seconds.
 
-## Local Development
+🔗 **Try it:** [calculator.snackai.dev](https://calculator.snackai.dev)
 
-```bash
-npm install
-npm run dev
-```
+---
 
-Open http://localhost:5173
+## What is this?
 
-## Deploy to Vercel
+A simple calculator that compares LLM inference costs across major providers:
 
-### Option 1: Vercel CLI
+- **Together AI**
+- **Fireworks**
+- **Groq**
+- **Baseten**
+- **Replicate**
+- **AWS Bedrock**
 
-```bash
-npm i -g vercel
-vercel
-```
+Enter your workload (requests/day, tokens, latency needs) and instantly see which provider is cheapest.
 
-### Option 2: GitHub + Vercel Dashboard
+## Models Supported
 
-1. Push this folder to a GitHub repo
-2. Go to vercel.com → New Project
-3. Import your GitHub repo
-4. Vercel auto-detects Vite — just click Deploy
+- Llama 3.1 70B & 8B
+- DeepSeek R1 & V3
+- Mixtral 8x7B
 
-### Option 3: Drag & Drop
+## Why we built this
 
-```bash
-npm run build
-```
+Teams running high-volume inference often pick a provider and stick with it — even when prices change or better options emerge. We found teams doing manual spreadsheet comparisons every few weeks.
 
-Then drag the `dist` folder to vercel.com/new
+This tool makes it instant.
 
-## Custom Domain
+## About Snack
 
-After deploying, go to your Vercel project settings → Domains to add:
-- `calculator.snack.com` (subdomain)
-- or any custom domain
+We're building tools to help AI teams optimize inference costs. This calculator is step one.
 
-## Updating Pricing Data
+📧 **Contact:** hello@snackai.dev
 
-Edit `src/App.jsx` and update the `providerData` object (around line 22).
+---
 
-## Connecting Forms
+## Contributing
 
-The waitlist and lead capture forms currently log to console. To connect to your backend:
+Found a pricing error? Provider missing? Open an issue or PR.
 
-1. **Airtable**: Replace `console.log` in `handleWaitlistSubmit` and `handleUploadSubmit` with fetch calls to Airtable API
-2. **Zapier**: Create a webhook and POST form data to it
-3. **Your own API**: Replace with your endpoint
+Pricing data is in `src/App.jsx` in the `providerData` object.
 
-Example:
-```javascript
-const handleWaitlistSubmit = async (e) => {
-  e.preventDefault();
-  await fetch('https://your-api.com/waitlist', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  });
-  setWaitlistSubmitted(true);
-};
-```
+## License
+
+MIT
