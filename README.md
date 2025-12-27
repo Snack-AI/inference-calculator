@@ -24,6 +24,7 @@ Enter your workload (requests/day, tokens, latency needs) and instantly see whic
 - Llama 3.1 70B & 8B
 - DeepSeek R1 & V3
 - Mixtral 8x7B
+- more to come...
 
 ## Why we built this
 
